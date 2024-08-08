@@ -126,6 +126,7 @@ const upload = multer({ storage: storage });
 
 // POST endpoint to handle image uploads
 app.post("/upload", upload.single("image"), (req, res) => {
+  console.log("request Object: ", req);
   if (!req.file || !req.body.deviceId) {
     return res.status(400).send("No image or deviceId provided");
   }
