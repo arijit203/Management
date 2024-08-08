@@ -5,6 +5,8 @@ const cors = require("cors");
 const jwt = require("jsonwebtoken");
 require("dotenv").config();
 const bcrypt = require("bcrypt");
+const multer = require("multer");
+const path = require("path");
 
 const app = express();
 const port = 5000;
@@ -106,6 +108,7 @@ app.get("/createImageTable", (req, res) => {
     id INT AUTO_INCREMENT PRIMARY KEY,
     filename VARCHAR(255) NOT NULL,
     filepath VARCHAR(255) NOT NULL,
+    deviceId VARCHAR(255),
     uploaded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
   `;
@@ -121,35 +124,34 @@ app.get("/createImageTable", (req, res) => {
 });
 
 // Set up multer for file uploads
-// const storage = multer.diskStorage({
-//   destination: (req, file, cb) => {
-//     cb(null, "uploads/"); // Directory to store uploaded images
-//   },
-//   filename: (req, file, cb) => {
-//     cb(null, Date.now() + path.extname(file.originalname)); // Unique filename
-//   },
-// });
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, "uploads/"); // Directory to store uploaded images
+  },
+  filename: (req, file, cb) => {
+    cb(null, Date.now() + path.extname(file.originalname)); // Unique filename
+  },
+});
 
-// const upload = multer({ storage: storage });
-
-// // Create the uploads directory if it doesn't exist
-// if (!fs.existsSync("uploads")) {
-//   fs.mkdirSync("uploads");
-// }
+const upload = multer({ storage });
 
 // POST endpoint to handle image uploads
-app.post("/upload", (req, res) => {
-  console.log("hit the URL upload");
+app.post("/upload", upload.single("image"), (req, res) => {
+  if (!req.file || !req.body.deviceId) {
+    return res.status(400).send("No image or deviceId provided");
+  }
+
   const { originalname, path: filepath } = req.file;
   const filename = req.file.filename;
+  const deviceId = req.body.deviceId;
 
   // SQL query to insert image metadata
-  const sql = "INSERT INTO Images (filename, filepath) VALUES (?, ?)";
-  db.query(sql, [filename, filepath], (err, result) => {
+  const sql =
+    "INSERT INTO Images (filename, filepath, deviceId) VALUES (?, ?, ?)";
+  db.query(sql, [filename, filepath, deviceId], (err) => {
     if (err) {
       console.error("Error inserting image metadata:", err);
-      res.status(500).send("Error storing image data");
-      return;
+      return res.status(500).send("Error storing image data");
     }
     res.send("Image uploaded and metadata stored successfully");
   });
