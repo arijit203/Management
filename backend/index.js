@@ -76,29 +76,24 @@ app.get("/createtable", (req, res) => {
 });
 
 app.get("/createProductTable", (req, res) => {
-  let sql = `
-  CREATE TABLE IF NOT EXISTS Product (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    deviceId VARCHAR(255),
-    sample VARCHAR(255),
-    date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    grain_count INT,
-    broken_rice FLOAT,
-    k_length FLOAT,
-    k_breadth FLOAT,
-    lb_ratio FLOAT,
-    location VARCHAR(255),
-    FOREIGN KEY (deviceId) REFERENCES ALL_USERS(deviceId)
-);
+  // SQL query to create the Images table
+  const sql = `
+    CREATE TABLE IF NOT EXISTS Images (
+      id INT AUTO_INCREMENT PRIMARY KEY,
+      filename VARCHAR(255) NOT NULL,
+      filedata LONGBLOB NOT NULL,
+      deviceId VARCHAR(255) NOT NULL,
+      createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )
   `;
 
-  db.query(sql, (err, result) => {
+  // Execute the SQL query
+  db.query(sql, (err) => {
     if (err) {
-      console.error("Error creating Product table:", err);
-      res.status(500).send("Error creating Product table");
-      return;
+      console.error("Error creating table:", err);
+      return res.status(500).send("Error creating table");
     }
-    res.send("Product table created successfully");
+    res.send("Table created successfully");
   });
 });
 
@@ -124,16 +119,10 @@ app.get("/createImageTable", (req, res) => {
 });
 
 // Set up multer for file uploads
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, "uploads/"); // Directory to store uploaded images
-  },
-  filename: (req, file, cb) => {
-    cb(null, Date.now() + path.extname(file.originalname)); // Unique filename
-  },
-});
 
-const upload = multer({ storage });
+// Configure multer to use memory storage
+const storage = multer.memoryStorage();
+const upload = multer({ storage: storage });
 
 // POST endpoint to handle image uploads
 app.post("/upload", upload.single("image"), (req, res) => {
@@ -141,14 +130,13 @@ app.post("/upload", upload.single("image"), (req, res) => {
     return res.status(400).send("No image or deviceId provided");
   }
 
-  const { originalname, path: filepath } = req.file;
-  const filename = req.file.filename;
+  const { buffer, originalname } = req.file; // Get file buffer and original name
   const deviceId = req.body.deviceId;
 
-  // SQL query to insert image metadata
+  // SQL query to insert image metadata and data
   const sql =
-    "INSERT INTO Images (filename, filepath, deviceId) VALUES (?, ?, ?)";
-  db.query(sql, [filename, filepath, deviceId], (err) => {
+    "INSERT INTO Images (filename, filedata, deviceId) VALUES (?, ?, ?)";
+  db.query(sql, [originalname, buffer, deviceId], (err) => {
     if (err) {
       console.error("Error inserting image metadata:", err);
       return res.status(500).send("Error storing image data");
