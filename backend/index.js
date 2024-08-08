@@ -13,20 +13,20 @@ app.use(cors());
 app.use(bodyParser.json());
 
 // MySQL database connection
-const db = mysql.createConnection({
-  host: "localhost",
-  user: "root",
-  password: "root",
-  database: "PROJECT",
-});
-
 // const db = mysql.createConnection({
-//   host: "bjsyvt822g7ahozjgxqe-mysql.services.clever-cloud.com",
-//   user: "ur9ppd0mn44uv7oa",
-//   password: "Oownoy5fZBDyiZxzrhMQ",
-//   database: "bjsyvt822g7ahozjgxqe",
-//   port: 3306,
+//   host: "localhost",
+//   user: "root",
+//   password: "root",
+//   database: "PROJECT",
 // });
+
+const db = mysql.createConnection({
+  host: "bjsyvt822g7ahozjgxqe-mysql.services.clever-cloud.com",
+  user: "ur9ppd0mn44uv7oa",
+  password: "Oownoy5fZBDyiZxzrhMQ",
+  database: "bjsyvt822g7ahozjgxqe",
+  port: 3306,
+});
 
 db.connect((err) => {
   if (err) {
