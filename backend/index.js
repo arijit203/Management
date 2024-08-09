@@ -122,18 +122,22 @@ const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
 
 // POST endpoint to handle image uploads
-// POST endpoint to handle image uploads
 app.post("/upload", upload.single("image"), (req, res) => {
-  if (!req.file || !req.body.deviceId) {
+  const { file, body } = req;
+  const deviceId = body.deviceId;
+
+  if (!file || !deviceId) {
     return res.status(400).send("No image or deviceId provided");
   }
 
-  const { buffer, originalname } = req.file;
-  const deviceId = req.body.deviceId;
+  // Convert file buffer to base64
+  const imageBase64 = file.buffer.toString("base64");
+  const filename = file.originalname;
 
+  // SQL query to insert image metadata and data
   const sql =
     "INSERT INTO Images (filename, filedata, deviceId) VALUES (?, ?, ?)";
-  db.query(sql, [originalname, buffer, deviceId], (err) => {
+  db.query(sql, [filename, imageBase64, deviceId], (err) => {
     if (err) {
       console.error("Error inserting image metadata:", err);
       return res.status(500).send("Error storing image data");
