@@ -128,10 +128,9 @@ app.post("/upload", upload.single("image"), (req, res) => {
     return res.status(400).send("No image or deviceId provided");
   }
 
-  const { buffer, originalname } = req.file; // Get file buffer and original name
+  const { buffer, originalname } = req.file;
   const deviceId = req.body.deviceId;
 
-  // SQL query to insert image metadata and data
   const sql =
     "INSERT INTO Images (filename, filedata, deviceId) VALUES (?, ?, ?)";
   db.query(sql, [originalname, buffer, deviceId], (err) => {
@@ -142,6 +141,7 @@ app.post("/upload", upload.single("image"), (req, res) => {
     res.send("Image uploaded and metadata stored successfully");
   });
 });
+
 app.get("/arijit", (req, res) => {
   return res.status(200).json({ message: "Hi from Arijit" });
 });
