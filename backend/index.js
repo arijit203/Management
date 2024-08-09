@@ -101,11 +101,11 @@ app.get("/createImageTable", (req, res) => {
   let sql = `
   CREATE TABLE IF NOT EXISTS Images (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    filename VARCHAR(255) NOT NULL,
-    filepath VARCHAR(255) NOT NULL,
+    filename VARCHAR(255),
+    filedata LONGBLOB,
     deviceId VARCHAR(255),
     uploaded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
+  );
   `;
 
   db.query(sql, (err, result) => {
@@ -118,15 +118,12 @@ app.get("/createImageTable", (req, res) => {
   });
 });
 
-// Set up multer for file uploads
-
-// Configure multer to use memory storage
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
 
 // POST endpoint to handle image uploads
+// POST endpoint to handle image uploads
 app.post("/upload", upload.single("image"), (req, res) => {
-  console.log("request Object: ", req);
   if (!req.file || !req.body.deviceId) {
     return res.status(400).send("No image or deviceId provided");
   }
@@ -145,7 +142,6 @@ app.post("/upload", upload.single("image"), (req, res) => {
     res.send("Image uploaded and metadata stored successfully");
   });
 });
-
 app.get("/arijit", (req, res) => {
   return res.status(200).json({ message: "Hi from Arijit" });
 });
