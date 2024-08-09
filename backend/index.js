@@ -12,7 +12,7 @@ const app = express();
 const port = 5000;
 
 app.use(cors());
-app.use(bodyParser.json());
+app.use(express.json({ limit: "2000mb" }));
 
 // MySQL database connection
 // const db = mysql.createConnection({
@@ -118,28 +118,26 @@ app.get("/createImageTable", (req, res) => {
   });
 });
 
-const storage = multer.memoryStorage();
-const upload = multer({ storage: storage });
+// const storage = multer.memoryStorage();
+// const upload = multer({ storage: storage });
 
-// POST endpoint to handle image uploads
-app.post("/upload", upload.single("image"), (req, res) => {
-  const { file, body } = req;
-  const deviceId = body.deviceId;
+app.post("/upload", (req, res) => {
+  const { image, deviceId } = req.body;
 
-  if (!file || !deviceId) {
-    return res.status(400).send("No image or deviceId provided");
+  if (!image || !deviceId) {
+    return res.status(400).send("Missing image or deviceId");
   }
 
-  // Convert file buffer to base64
-  const imageBase64 = file.buffer.toString("base64");
-  const filename = file.originalname;
+  // Decode base64 image data
+  const imageBuffer = Buffer.from(image, "base64");
+  const filename = "uploaded_image.jpg"; // Or derive the filename if needed
 
   // SQL query to insert image metadata and data
   const sql =
     "INSERT INTO Images (filename, filedata, deviceId) VALUES (?, ?, ?)";
-  db.query(sql, [filename, imageBase64, deviceId], (err) => {
+  db.query(sql, [filename, imageBuffer, deviceId], (err) => {
     if (err) {
-      console.error("Error inserting image metadata:", err);
+      console.error("Error inserting image data:", err);
       return res.status(500).send("Error storing image data");
     }
     res.send("Image uploaded and metadata stored successfully");
