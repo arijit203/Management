@@ -12,7 +12,7 @@ const app = express();
 const port = 5000;
 
 app.use(cors());
-app.use(express.json({ limit: "2000mb" }));
+app.use(express.json({ limit: "200mb" }));
 
 // MySQL database connection
 // const db = mysql.createConnection({
@@ -102,7 +102,7 @@ app.get("/createImageTable", (req, res) => {
   CREATE TABLE IF NOT EXISTS Images (
     id INT AUTO_INCREMENT PRIMARY KEY,
     filename VARCHAR(255),
-    filedata LONGBLOB,
+    filedata LONGTEXT,
     deviceId VARCHAR(255),
     uploaded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
   );
@@ -121,28 +121,36 @@ app.get("/createImageTable", (req, res) => {
 // const storage = multer.memoryStorage();
 // const upload = multer({ storage: storage });
 
-app.post("/upload", (req, res) => {
-  const { image, deviceId } = req.body;
+const upload = multer({ storage: multer.memoryStorage() });
 
-  if (!image || !deviceId) {
-    return res.status(400).send("Missing image or deviceId");
-  }
+app.post("/upload", upload.single("image"), (req, res) => {
+  const imageBuffer = req.file.buffer.toString("base64");
+  const filename = req.file.originalname | null;
+  const deviceId = req.body.deviceId;
 
-  // Decode base64 image data
-  const imageBuffer = Buffer.from(image, "base64");
-  const filename = "uploaded_image.jpg"; // Or derive the filename if needed
-
-  // SQL query to insert image metadata and data
   const sql =
     "INSERT INTO Images (filename, filedata, deviceId) VALUES (?, ?, ?)";
-  db.query(sql, [filename, imageBuffer, deviceId], (err) => {
+  db.query(sql, [filename, imageBuffer, deviceId], (err, result) => {
     if (err) {
-      console.error("Error inserting image data:", err);
-      return res.status(500).send("Error storing image data");
+      console.error("Error inserting image data into the database:", err);
+      res.status(500).send("Error inserting image data into the database");
+      return;
     }
-    res.send("Image uploaded and metadata stored successfully");
+    res.send("Image uploaded and saved successfully");
   });
 });
+
+// app.post("/upload",upload.single('ProductImage'), (req, res) => {
+//   image=req.file.buffer.toString('base64')
+//   name=req.body.product
+//   price=req.body.price
+//   q="INSERT INTO Images Values(?,)";
+//   db.query(q,[name,price,image],(err,rows,fields)=>{
+//     if(err) throw err;
+//     res.redirect();
+//   })
+
+// });
 
 app.get("/arijit", (req, res) => {
   return res.status(200).json({ message: "Hi from Arijit" });
