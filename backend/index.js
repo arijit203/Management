@@ -90,15 +90,14 @@ app.get("/createMachineTable", (req, res) => {
     average_breadth FLOAT,
     average_lb_ratio FLOAT,
     broken_rice FLOAT,
-    observation VARCHAR(255),
-);
-`;
+    observation VARCHAR(255)
+  );`;
   db.query(sql, (err) => {
     if (err) {
       console.error("Error creating table:", err);
       throw err;
     }
-    res.send("ALL_USERS table created");
+    res.send("Machine table created");
   });
 });
 
