@@ -146,7 +146,7 @@ app.get("/createImageTable", (req, res) => {
 });
 
 // Route to create a new Machine record
-router.post("/machine", (req, res) => {
+app.post("/machine", (req, res) => {
   const {
     device_id,
     grain_count,
@@ -164,7 +164,7 @@ router.post("/machine", (req, res) => {
   `;
 
   // Execute the query
-  pool.query(
+  db.query(
     query,
     [
       device_id,
@@ -181,12 +181,10 @@ router.post("/machine", (req, res) => {
         return res.status(500).json({ error: "Database error" });
       }
 
-      res
-        .status(201)
-        .json({
-          message: "Machine record created successfully",
-          id: results.insertId,
-        });
+      res.status(201).json({
+        message: "Machine record created successfully",
+        id: results.insertId,
+      });
     }
   );
 });
