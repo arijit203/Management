@@ -188,9 +188,9 @@ const AddUserForm = ({ onAddUser }) => {
                   <option value="" disabled selected>
                     Select Role
                   </option>
-                  <option value="admin">Admin</option>
-                  <option value="manager">Manager</option>
-                  <option value="field-staff">Field Staff</option>
+                  <option value="Admin">Admin</option>
+                  <option value="Manager">Manager</option>
+                  <option value="Field Staff">Field Staff</option>
                 </select>
                 <svg
                   xmlns="http://www.w3.org/2000/svg"

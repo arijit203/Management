@@ -11,7 +11,13 @@ const path = require("path");
 const app = express();
 const port = 5000;
 
-app.use(cors());
+app.use(
+  cors({
+    origin: "*", // Allow all origins
+    methods: ["GET", "POST", "PUT", "DELETE"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+  })
+);
 app.use(express.json({ limit: "200mb" }));
 
 // MySQL database connection
@@ -75,6 +81,27 @@ app.get("/createtable", (req, res) => {
   });
 });
 
+app.get("/createMachineTable", (req, res) => {
+  let sql = `CREATE TABLE Machine (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    device_id VARCHAR(255) NOT NULL,
+    grain_count INT,
+    average_length FLOAT,
+    average_breadth FLOAT,
+    average_lb_ratio FLOAT,
+    broken_rice FLOAT,
+    observation VARCHAR(255),
+);
+`;
+  db.query(sql, (err) => {
+    if (err) {
+      console.error("Error creating table:", err);
+      throw err;
+    }
+    res.send("ALL_USERS table created");
+  });
+});
+
 app.get("/createProductTable", (req, res) => {
   // SQL query to create the Images table
   const sql = `
@@ -118,6 +145,52 @@ app.get("/createImageTable", (req, res) => {
   });
 });
 
+// Route to create a new Machine record
+router.post("/machine", (req, res) => {
+  const {
+    device_id,
+    grain_count,
+    average_length,
+    average_breadth,
+    average_lb_ratio,
+    broken_rice,
+    observation,
+  } = req.body;
+
+  // Insert query
+  const query = `
+      INSERT INTO Machine (device_id, grain_count, average_length, average_breadth, average_lb_ratio, broken_rice, observation)
+      VALUES (?, ?, ?, ?, ?, ?, ?)
+  `;
+
+  // Execute the query
+  pool.query(
+    query,
+    [
+      device_id,
+      grain_count,
+      average_length,
+      average_breadth,
+      average_lb_ratio,
+      broken_rice,
+      observation,
+    ],
+    (err, results) => {
+      if (err) {
+        console.error("Error inserting record:", err);
+        return res.status(500).json({ error: "Database error" });
+      }
+
+      res
+        .status(201)
+        .json({
+          message: "Machine record created successfully",
+          id: results.insertId,
+        });
+    }
+  );
+});
+
 // const storage = multer.memoryStorage();
 // const upload = multer({ storage: storage });
 
@@ -140,17 +213,27 @@ app.post("/upload", upload.single("image"), (req, res) => {
   });
 });
 
-// app.post("/upload",upload.single('ProductImage'), (req, res) => {
-//   image=req.file.buffer.toString('base64')
-//   name=req.body.product
-//   price=req.body.price
-//   q="INSERT INTO Images Values(?,)";
-//   db.query(q,[name,price,image],(err,rows,fields)=>{
-//     if(err) throw err;
-//     res.redirect();
-//   })
+app.get("/imageByDeviceId/:deviceId", (req, res) => {
+  const deviceId = req.params.deviceId;
 
-// });
+  const sql = "SELECT filename, filedata FROM Images WHERE deviceId = ?";
+  db.query(sql, [deviceId], (err, result) => {
+    if (err) {
+      console.error("Error retrieving image from the database:", err);
+      res.status(500).send("Error retrieving image from the database");
+      return;
+    }
+
+    if (result.length === 0) {
+      res.status(404).send("Image not found for the given deviceId");
+      return;
+    }
+
+    const image = result[0];
+    res.setHeader("Content-Type", "image/jpeg"); // Set the correct MIME type
+    res.send(Buffer.from(image.filedata, "base64")); // Send the image data
+  });
+});
 
 app.get("/arijit", (req, res) => {
   return res.status(200).json({ message: "Hi from Arijit" });

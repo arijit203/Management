@@ -1,28 +1,28 @@
-import React from 'react';
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import PrivateRoute from './PrivateRoute';
+import React from "react";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import PrivateRoute from "./PrivateRoute";
 
-import LoginForm from './LoginForm';
-import ManagerDashboard from './ManagerDashboard';
-import UserDashboard from './field_Staff/UserDashboard';
-import DataTable from './DataTable';
-import FormDetails from './field_Staff/FormDetails';
+import LoginForm from "./LoginForm";
+import ManagerDashboard from "./ManagerDashboard";
+import UserDashboard from "./field_Staff/UserDashboard";
+import DataTable from "./DataTable";
+import FormDetails from "./field_Staff/FormDetails";
+import ImageDisplay from "./ImageDisplay";
 
 const App = () => {
   return (
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<LoginForm />} />
-        
+        <Route path="/ImageDisplay/:deviceId" element={<ImageDisplay />} />
 
-        <Route element={<PrivateRoute allowedRoles={['Manager', 'Admin']} />}>
+        <Route element={<PrivateRoute allowedRoles={["Manager", "Admin"]} />}>
           <Route path="/manager_dashboard" element={<ManagerDashboard />} />
           <Route path="/dataTable" element={<DataTable />} />
         </Route>
-        <Route element={<PrivateRoute allowedRoles={['Field Staff']} />}>
+        <Route element={<PrivateRoute allowedRoles={["Field Staff"]} />}>
           <Route path="/user_dashboard" element={<UserDashboard />} />
           <Route path="/formDetails" element={<FormDetails />} />
-
         </Route>
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
