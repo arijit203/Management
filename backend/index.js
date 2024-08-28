@@ -94,7 +94,8 @@ app.get("/createMachineTable", (req, res) => {
     average_breadth FLOAT,
     average_lb_ratio FLOAT,
     broken_rice FLOAT,
-    observation VARCHAR(255)
+    observation VARCHAR(255),
+    filedata LONGBLOB NOT NULL,
   );`;
   db.query(sql, (err) => {
     if (err) {
@@ -149,8 +150,56 @@ app.get("/createImageTable", (req, res) => {
 });
 
 // Route to create a new Machine record
-app.post("/machine", (req, res) => {
-  console.log("Request body: ", req.body);
+// app.post("/machine", (req, res) => {
+//   console.log("Request body: ", req.body);
+//   const {
+//     device_id,
+//     grain_count,
+//     average_length,
+//     average_breadth,
+//     average_lb_ratio,
+//     broken_rice,
+//     observation,
+//   } = req.body.data;
+
+//   // Insert query
+//   const query = `
+//       INSERT INTO Machine (device_id, grain_count, average_length, average_breadth, average_lb_ratio, broken_rice, observation)
+//       VALUES (?, ?, ?, ?, ?, ?, ?)
+//   `;
+
+//   // Execute the query
+//   db.query(
+//     query,
+//     [
+//       device_id,
+//       grain_count,
+//       average_length,
+//       average_breadth,
+//       average_lb_ratio,
+//       broken_rice,
+//       observation,
+//     ],
+//     (err, results) => {
+//       if (err) {
+//         console.error("Error inserting record:", err);
+//         return res.status(500).json({ error: "Database error" });
+//       }
+
+//       res.status(201).json({
+//         message: "Machine record created successfully",
+//         id: results.insertId,
+//       });
+//     }
+//   );
+// });
+
+// const storage = multer.memoryStorage();
+// const upload = multer({ storage: storage });
+
+const upload = multer({ storage: multer.memoryStorage() });
+
+app.post("/machine", upload.single("image"), (req, res) => {
   const {
     device_id,
     grain_count,
@@ -159,16 +208,25 @@ app.post("/machine", (req, res) => {
     average_lb_ratio,
     broken_rice,
     observation,
-  } = req.body.data;
+  } = req.body;
+  const imageBuffer = req.file.buffer.toString("base64");
 
-  // Insert query
-  const query = `
-      INSERT INTO Machine (device_id, grain_count, average_length, average_breadth, average_lb_ratio, broken_rice, observation)
-      VALUES (?, ?, ?, ?, ?, ?, ?)
-  `;
+  // Print received fields
+  console.log("Received data:");
+  console.log(`Device ID: ${device_id}`);
+  console.log(`Grain Count: ${grain_count}`);
+  console.log(`Average Length: ${average_length}`);
+  console.log(`Average Breadth: ${average_breadth}`);
+  console.log(`Average LB Ratio: ${average_lb_ratio}`);
+  console.log(`Broken Rice: ${broken_rice}`);
+  console.log(`Observation: ${observation}`);
+  console.log(`Image Path: ${imageBuffer}`);
 
-  // Execute the query
-  db.query(
+  // Insert data into MySQL database
+  const query = `INSERT INTO Machine (device_id, grain_count, average_length, average_breadth, average_lb_ratio, broken_rice, observation, filedata)
+                 VALUES (?, ?, ?, ?, ?, ?, ?, ?)`;
+
+  connection.query(
     query,
     [
       device_id,
@@ -178,25 +236,17 @@ app.post("/machine", (req, res) => {
       average_lb_ratio,
       broken_rice,
       observation,
+      imageBuffer,
     ],
     (err, results) => {
       if (err) {
-        console.error("Error inserting record:", err);
-        return res.status(500).json({ error: "Database error" });
+        console.error("Error inserting data into the database:", err);
+        return res.status(500).send("Internal Server Error");
       }
-
-      res.status(201).json({
-        message: "Machine record created successfully",
-        id: results.insertId,
-      });
+      res.status(200).send("Data inserted successfully");
     }
   );
 });
-
-// const storage = multer.memoryStorage();
-// const upload = multer({ storage: storage });
-
-const upload = multer({ storage: multer.memoryStorage() });
 
 app.post("/upload", upload.single("image"), (req, res) => {
   const imageBuffer = req.file.buffer.toString("base64");
