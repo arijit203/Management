@@ -150,6 +150,7 @@ app.get("/createImageTable", (req, res) => {
 
 // Route to create a new Machine record
 app.post("/machine", (req, res) => {
+  console.log("Request body: ", req.body);
   const {
     device_id,
     grain_count,
