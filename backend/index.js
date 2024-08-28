@@ -222,11 +222,11 @@ app.post("/machine", upload.single("image"), (req, res) => {
   console.log(`Average LB Ratio: ${average_lb_ratio}`);
   console.log(`Broken Rice: ${broken_rice}`);
   console.log(`Observation: ${observation}`);
-  console.log(`Image Path: ${imageBuffer}`);
+  // console.log(`Image Path: ${imageBuffer}`);
 
   // Insert data into MySQL database
   const query = `INSERT INTO Machine (device_id, grain_count, average_length, average_breadth, average_lb_ratio, broken_rice, observation)
-                 VALUES (?, ?, ?, ?, ?, ?, ?, ?)`;
+                 VALUES (?, ?, ?, ?, ?, ?, ?)`;
 
   db.query(
     query,
