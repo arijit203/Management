@@ -211,7 +211,7 @@ app.post("/machine", upload.single("image"), (req, res) => {
     broken_rice,
     observation,
   } = req.body;
-  const imageBuffer = req.file.buffer.toString("base64");
+  // const imageBuffer = req.file.buffer.toString("base64");
 
   // Print received fields
   console.log("Received data:");
@@ -225,7 +225,7 @@ app.post("/machine", upload.single("image"), (req, res) => {
   console.log(`Image Path: ${imageBuffer}`);
 
   // Insert data into MySQL database
-  const query = `INSERT INTO Machine (device_id, grain_count, average_length, average_breadth, average_lb_ratio, broken_rice, observation, filedata)
+  const query = `INSERT INTO Machine (device_id, grain_count, average_length, average_breadth, average_lb_ratio, broken_rice, observation)
                  VALUES (?, ?, ?, ?, ?, ?, ?, ?)`;
 
   db.query(
@@ -238,7 +238,6 @@ app.post("/machine", upload.single("image"), (req, res) => {
       average_lb_ratio,
       broken_rice,
       observation,
-      imageBuffer,
     ],
     (err, results) => {
       if (err) {
