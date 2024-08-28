@@ -159,7 +159,7 @@ app.post("/machine", (req, res) => {
     average_lb_ratio,
     broken_rice,
     observation,
-  } = req.body;
+  } = req.body.data;
 
   // Insert query
   const query = `
