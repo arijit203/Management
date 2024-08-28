@@ -34,10 +34,10 @@ const db = mysql.createConnection({
   password: "Oownoy5fZBDyiZxzrhMQ",
   database: "bjsyvt822g7ahozjgxqe",
   port: 3306,
-  connectionLimit: 10,
-  connectTimeout: 600000, // 10 minutes in milliseconds
-  acquireTimeout: 600000, // 10 minutes in milliseconds
-  waitForConnections: true,
+  // connectionLimit: 10,
+  // connectTimeout: 600000, // 10 minutes in milliseconds
+  // acquireTimeout: 600000, // 10 minutes in milliseconds
+  // waitForConnections: true,
 });
 
 db.connect((err) => {
@@ -73,7 +73,7 @@ app.get("/createtable", (req, res) => {
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     phone_no VARCHAR(255),
-    deviceId VARCHAR(255) UNIQUE  -- Adding deviceId column
+    deviceId VARCHAR(255) UNIQUE  
 );
 `;
   db.query(sql, (err) => {
@@ -86,7 +86,7 @@ app.get("/createtable", (req, res) => {
 });
 
 app.get("/createMachineTable", (req, res) => {
-  let sql = `CREATE TABLE Machine (
+  const sql = `CREATE TABLE Machine (
     id INT AUTO_INCREMENT PRIMARY KEY,
     device_id VARCHAR(255) NOT NULL,
     grain_count INT,
@@ -95,12 +95,14 @@ app.get("/createMachineTable", (req, res) => {
     average_lb_ratio FLOAT,
     broken_rice FLOAT,
     observation VARCHAR(255),
-    filedata LONGBLOB NOT NULL,
+    filedata LONGBLOB
   );`;
+
   db.query(sql, (err) => {
     if (err) {
       console.error("Error creating table:", err);
-      throw err;
+      res.status(500).send("Error creating table");
+      return;
     }
     res.send("Machine table created");
   });
