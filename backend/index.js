@@ -34,6 +34,10 @@ const db = mysql.createConnection({
   password: "Oownoy5fZBDyiZxzrhMQ",
   database: "bjsyvt822g7ahozjgxqe",
   port: 3306,
+  connectionLimit: 10,
+  connectTimeout: 600000, // 10 minutes in milliseconds
+  acquireTimeout: 600000, // 10 minutes in milliseconds
+  waitForConnections: true,
 });
 
 db.connect((err) => {
