@@ -242,7 +242,7 @@ app.post("/machine", upload.single("image"), (req, res) => {
     ],
     (err, results) => {
       if (err) {
-        console.error("Error inserting data into the database:", err);
+        console.error("Error inserting data into the database:");
         return res.status(500).send("Internal Server Error");
       }
       res.status(200).send("Data inserted successfully");
