@@ -89,11 +89,11 @@ app.get("/createMachineTable", (req, res) => {
   const sql = `CREATE TABLE Machine (
     id INT AUTO_INCREMENT PRIMARY KEY,
     device_id VARCHAR(255) NOT NULL,
-    grain_count INT,
-    average_length FLOAT,
-    average_breadth FLOAT,
-    average_lb_ratio FLOAT,
-    broken_rice FLOAT,
+    grain_count VARCHAR(255),
+    average_length VARCHAR(255),
+    average_breadth VARCHAR(255),
+    average_lb_ratio VARCHAR(255),
+    broken_rice VARCHAR(255),
     observation VARCHAR(255),
     filedata LONGBLOB
   );`;
@@ -211,7 +211,7 @@ app.post("/machine", upload.single("image"), (req, res) => {
     broken_rice,
     observation,
   } = req.body;
-  // const imageBuffer = req.file.buffer.toString("base64");
+  const imageBuffer = req.file.buffer.toString("base64");
 
   // Print received fields
   console.log("Received data:");
@@ -225,8 +225,8 @@ app.post("/machine", upload.single("image"), (req, res) => {
   // console.log(`Image Path: ${imageBuffer}`);
 
   // Insert data into MySQL database
-  const query = `INSERT INTO Machine (device_id, grain_count, average_length, average_breadth, average_lb_ratio, broken_rice, observation)
-                 VALUES (?, ?, ?, ?, ?, ?, ?)`;
+  const query = `INSERT INTO Machine (device_id, grain_count, average_length, average_breadth, average_lb_ratio, broken_rice, observation, filedata)
+                 VALUES (?, ?, ?, ?, ?, ?, ?, ?)`;
 
   db.query(
     query,
@@ -238,10 +238,11 @@ app.post("/machine", upload.single("image"), (req, res) => {
       average_lb_ratio,
       broken_rice,
       observation,
+      imageBuffer,
     ],
     (err, results) => {
       if (err) {
-        console.error("Error inserting data into the database:");
+        console.error("Error inserting data into the database:", err);
         return res.status(500).send("Internal Server Error");
       }
       res.status(200).send("Data inserted successfully");
