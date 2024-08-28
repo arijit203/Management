@@ -226,7 +226,7 @@ app.post("/machine", upload.single("image"), (req, res) => {
   const query = `INSERT INTO Machine (device_id, grain_count, average_length, average_breadth, average_lb_ratio, broken_rice, observation, filedata)
                  VALUES (?, ?, ?, ?, ?, ?, ?, ?)`;
 
-  connection.query(
+  db.query(
     query,
     [
       device_id,
